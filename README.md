@@ -1,14 +1,14 @@
 # Study Map
 
-A personal learning tracker that uses local AI (Ollama) to classify your study sessions, discover connections between topics, and surface knowledge blindspots. Built with Streamlit and SQLite.
+A personal learning tracker that uses local AI (Ollama) to classify your study sessions, discover connections between topics, and surface knowledge blindspots. Built with Flask and SQLite.
 
 ## Features
 
 - **Log daily learning** — record topic, skills, and a summary of what you learnt
 - **AI classification** — automatically tags entries with domain, complexity, sub-topics, and key concepts
-- **Knowledge graph** — neo4j-style interactive visualisation showing how entries and skills connect
+- **Knowledge graph** — interactive vis.js visualisation showing how entries and skills connect
 - **Blindspot detection** — AI identifies gaps in your knowledge and suggests what to explore next
-- **Analytics dashboard** — charts for learning activity, skill distribution, complexity breakdown, and domains
+- **Analytics dashboard** — Chart.js charts for learning activity, skill distribution, complexity breakdown, and domains
 - **Normalised database** — structured SQLite schema that is easy to query and extend
 
 ## Prerequisites
@@ -42,22 +42,35 @@ cp .env.example .env
 ## Run
 
 ```bash
-streamlit run app.py
+python app.py
 ```
 
-The app opens at `http://localhost:8501`.
+The app opens at `http://localhost:5000`.
 
 ## Project Structure
 
 ```
 study-map/
-├── app.py              # Streamlit application (UI + routing)
+├── app.py              # Flask application (routes + JSON API)
 ├── database.py         # SQLite database layer (schema + queries)
 ├── ai_service.py       # Ollama AI classification service
 ├── requirements.txt    # Python dependencies
 ├── .env.example        # Environment variable template
 ├── .gitignore          # Excludes .env, .db, __pycache__
-└── README.md
+├── static/
+│   ├── css/
+│   │   └── style.css   # V-Labs–inspired light design system
+│   └── js/
+│       ├── main.js     # Global utilities
+│       ├── graph.js    # vis.js knowledge graph
+│       └── analytics.js# Chart.js analytics charts
+└── templates/
+    ├── base.html       # Shared layout with sidebar navigation
+    ├── log_entry.html  # Log Entry form + AI results
+    ├── graph.html      # Knowledge Graph page
+    ├── entries.html    # Entries list + detail viewer
+    ├── blindspots.html # Blindspots grouped by category
+    └── analytics.html  # Analytics dashboard
 ```
 
 ## Database Schema
@@ -196,14 +209,14 @@ Set these in a `.env` file or as environment variables.
 
 ## Tech Stack
 
-| Component       | Technology              |
-|-----------------|-------------------------|
-| Frontend / BI   | Streamlit               |
-| AI Engine       | Ollama (local LLM)      |
-| Database        | SQLite                  |
-| Graph Viz       | streamlit-agraph (vis.js)|
-| Charts          | Plotly                  |
-| Styling         | Custom CSS (glassmorphism, Inter font) |
+| Component       | Technology                         |
+|-----------------|------------------------------------|
+| Backend         | Flask                              |
+| AI Engine       | Ollama (local LLM)                 |
+| Database        | SQLite                             |
+| Graph Viz       | vis.js (CDN)                       |
+| Charts          | Chart.js (CDN)                     |
+| Styling         | Custom CSS (Inter font, V-Labs–inspired light theme) |
 
 ## License
 
