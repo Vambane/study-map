@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Log Entry – Study Map{% endblock %}
+
+{% block content %}
+<!-- Geometric decorations -->
+<div class="geo-wrap">
+    <div class="geo pill" style="right:40px;top:-20px;width:80px;height:200px;background:#8b5cf6;"></div>
+    <div class="geo pill" style="right:60px;top:-30px;width:60px;height:180px;background:#a78bfa;"></div>
+    <div class="geo circle" style="right:0;top:10px;width:90px;height:90px;background:#5bb8a9;"></div>
+    <div class="geo circle" style="right:200px;top:120px;width:140px;height:140px;background:#ef6c4e;"></div>
+    <div class="geo circle" style="right:150px;top:140px;width:80px;height:80px;background:#d4a0a0;"></div>
+    <div class="geo dots" style="right:180px;top:230px;">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="geo rect" style="right:-10px;top:80px;width:50px;height:14px;background:#4a6fa5;"></div>
+    <div class="geo rect" style="right:-10px;top:100px;width:50px;height:14px;background:#4a6fa5;"></div>
+    <div class="geo rect" style="right:-10px;top:120px;width:50px;height:14px;background:#4a6fa5;opacity:0.35;"></div>
+</div>
+
+<div class="page-header">
+    <h1>Log Today's<br>Learning</h1>
+    <p>Record what you worked on and let AI classify and connect it to your knowledge map.</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+{% if success_id %}
+<div class="alert alert-success">Entry #{{ success_id }} saved successfully!</div>
+{% endif %}
+
+<div class="two-col">
+    <!-- Form -->
+    <div>
+        <form method="POST" action="{{ url_for('log_entry') }}" class="form-card" id="entryForm">
+            <div class="form-group">
+                <label for="topic">Topic / Title</label>
+                <input type="text" id="topic" name="topic" placeholder="e.g. Understanding Docker Networking" required>
+            </div>
+            <div class="form-group">
+                <label for="skills">Skills / Courses (comma-separated)</label>
+                <input type="text" id="skills" name="skills" placeholder="e.g. Docker, Networking, DevOps" required>
+            </div>
+            <div class="form-group">
+                <label for="summary">Summary of what you learnt</label>
+                <textarea id="summary" name="summary" placeholder="Write freely – the AI will classify and connect it for you..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Save &amp; Classify</button>
+        </form>
+
+        {% if result %}
+        <hr class="divider">
+
+        <!-- Classification results -->
+        {% if result.classification %}
+        <div class="stat-grid cols-4">
+            <div class="stat-card">
+                <div class="label">Domain</div>
+                <div class="text-val">{{ result.classification.domain or 'N/A' }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Complexity</div>
+                <div class="text-val">{{ (result.classification.complexity or 'N/A')|title }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Sub-topics</div>
+                <div class="tags" style="margin-top:6px;">
+                    {% for t in result.classification.get('sub_topics', []) %}
+                    <span class="tag tag-teal">{{ t }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Key Concepts</div>
+                <div class="tags" style="margin-top:6px;">
+                    {% for t in result.classification.get('key_concepts', []) %}
+                    <span class="tag tag-emerald">{{ t }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if result.connections %}
+        <h3>Connections Found</h3>
+        {% for c in result.connections %}
+        <div class="connection-card">
+            <div>
+                <span class="entry-id">ENTRY #{{ c.target_entry_id }}</span>
+                <span class="rel">{{ c.relationship }}</span>
+            </div>
+            <span class="tag tag-teal">Strength: {{ c.strength }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if result.blindspots %}
+        <h3>Blindspots to Explore</h3>
+        {% for bs in result.blindspots %}
+        <div class="blindspot-card">
+            <div class="blindspot-header">
+                <div class="blindspot-text">{{ bs.suggestion }}</div>
+                <span class="tag tag-rose">{{ bs.category or 'Suggestion' }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Side panel -->
+    <div>
+        <div class="card">
+            <div class="card-label">How It Works</div>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-num" style="background:#8b5cf6;">1</span>
+                    <div><div class="step-title">Describe your work</div><div class="step-desc">Enter a topic, skills, and summary</div></div>
+                </div>
+                <div class="step">
+                    <span class="step-num" style="background:#a78bfa;">2</span>
+                    <div><div class="step-title">AI classifies it</div><div class="step-desc">Domain, complexity, key concepts</div></div>
+                </div>
+                <div class="step">
+                    <span class="step-num" style="background:#5bb8a9;">3</span>
+                    <div><div class="step-title">Connections found</div><div class="step-desc">Links to your previous learning</div></div>
+                </div>
+                <div class="step">
+                    <span class="step-num" style="background:#ef6c4e;">4</span>
+                    <div><div class="step-title">Blindspots revealed</div><div class="step-desc">What you might be missing</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay (hidden by default) -->
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Saving &amp; classifying with AI&hellip;</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('entryForm').addEventListener('submit', function() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+});
+</script>
+{% endblock %}

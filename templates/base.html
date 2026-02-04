@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Study Map{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ── Sidebar ────────────────────────────────── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>study map</h2>
+            <span class="subtitle">Learning Intelligence</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <p class="nav-label">Navigation</p>
+            <a href="{{ url_for('log_entry') }}" class="nav-item {% if active == 'log' %}active{% endif %}">
+                <span class="nav-icon">&#9998;</span> Log Entry
+            </a>
+            <a href="{{ url_for('graph') }}" class="nav-item {% if active == 'graph' %}active{% endif %}">
+                <span class="nav-icon">&#127760;</span> Knowledge Graph
+            </a>
+            <a href="{{ url_for('entries') }}" class="nav-item {% if active == 'entries' %}active{% endif %}">
+                <span class="nav-icon">&#128218;</span> Entries
+            </a>
+            <a href="{{ url_for('blindspots') }}" class="nav-item {% if active == 'blindspots' %}active{% endif %}">
+                <span class="nav-icon">&#128065;</span> Blindspots
+            </a>
+            <a href="{{ url_for('analytics') }}" class="nav-item {% if active == 'analytics' %}active{% endif %}">
+                <span class="nav-icon">&#128200;</span> Analytics
+            </a>
+        </nav>
+
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-stats">
+            <p class="stats-label">Quick Stats</p>
+            <div class="stat-row"><span class="name">Entries</span><span class="val">{{ sidebar.entries }}</span></div>
+            <div class="stat-row"><span class="name">Skills</span><span class="val">{{ sidebar.skills }}</span></div>
+            <div class="stat-row"><span class="name">Blindspots</span><span class="val">{{ sidebar.blindspots }}</span></div>
+        </div>
+    </aside>
+
+    <!-- ── Main content ───────────────────────────── -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Knowledge Graph – Study Map{% endblock %}
+
+{% block head %}
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Knowledge Graph</h1>
+    <p>Visualise how your learning connects across topics and skills.</p>
+</div>
+
+{% if not has_data %}
+<div class="empty-state">
+    <div class="empty-state-icon">&#127760;</div>
+    <h3>Your knowledge graph is empty</h3>
+    <p>Log your first learning session to see it here.</p>
+</div>
+{% else %}
+<div class="legend">
+    <span><span class="legend-dot" style="background:#8b5cf6;"></span> Entries</span>
+    <span><span class="legend-dot" style="background:#ef6c4e;"></span> Skills</span>
+    <span><span class="legend-dot" style="background:#f43f5e;"></span> AI Connections</span>
+</div>
+<div id="graphCanvas" class="graph-container"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if has_data %}
+<script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+{% endif %}
+{% endblock %}

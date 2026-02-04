@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Entries – Study Map{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Learning Entries</h1>
+    <p>Browse and explore all your recorded study sessions.</p>
+</div>
+
+{% if entries|length == 0 %}
+<div class="empty-state">
+    <div class="empty-state-icon">&#128218;</div>
+    <h3>No entries yet</h3>
+    <p>Head to <a href="{{ url_for('log_entry') }}">Log Entry</a> to record your first session.</p>
+</div>
+{% else %}
+
+<div class="stat-grid cols-3">
+    <div class="stat-card"><div class="number">{{ stats.total }}</div><div class="label">Total Entries</div></div>
+    <div class="stat-card"><div class="number">{{ stats.skills }}</div><div class="label">Unique Skills</div></div>
+    <div class="stat-card"><div class="number">{{ stats.domains }}</div><div class="label">Domains</div></div>
+</div>
+
+<hr class="divider">
+
+{% set colors = ['tag-purple', 'tag-coral', 'tag-teal', 'tag-blue', 'tag-amber'] %}
+
+{% for e in entries %}
+<div class="entry-card">
+    <div class="entry-header">
+        <div>
+            <span class="entry-id">ENTRY #{{ e.id }}</span>
+            {% if e.ai_classification and e.ai_classification.complexity %}
+            <span class="tag tag-rose">{{ e.ai_classification.complexity|title }}</span>
+            {% endif %}
+            <div class="entry-title">{{ e.topic_title }}</div>
+            {% if e.skills %}
+            <div class="tags">
+                {% for s in e.skills.split(', ') %}
+                <span class="tag {{ colors[loop.index0 % colors|length] }}">{{ s }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="entry-date">{{ e.created_at[:10] if e.created_at else '' }}</div>
+    </div>
+    <div class="entry-summary">{{ e.summary[:250] }}{% if e.summary|length > 250 %}&hellip;{% endif %}</div>
+</div>
+{% endfor %}
+
+<hr class="divider">
+
+<h3>Entry Detail View</h3>
+<div class="form-group">
+    <label for="detailSelect">Select an entry</label>
+    <select id="detailSelect" onchange="loadDetail(this.value)">
+        {% for e in entries %}
+        <option value="{{ e.id }}">#{{ e.id }} – {{ e.topic_title }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div id="detailBox"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loadDetail(id) {
+    fetch('/api/entry/' + id)
+        .then(r => r.json())
+        .then(data => {
+            let html = '<div class="card" style="margin-top:12px;">';
+            html += '<div class="card-label">Full Summary</div>';
+            html += '<div class="detail-summary">' + data.summary + '</div>';
+            if (data.ai_classification) {
+                html += '<div class="card-label" style="margin-top:20px;">AI Classification</div>';
+                html += '<pre class="json-block">' + JSON.stringify(data.ai_classification, null, 2) + '</pre>';
+            }
+            html += '</div>';
+            document.getElementById('detailBox').innerHTML = html;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sel = document.getElementById('detailSelect');
+    if (sel && sel.value) loadDetail(sel.value);
+});
+</script>
+{% endblock %}

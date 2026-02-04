@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Blindspots – Study Map{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Blindspots</h1>
+    <p>AI-identified gaps in your knowledge and suggested areas to explore next.</p>
+</div>
+
+{% if total == 0 %}
+<div class="empty-state">
+    <div class="empty-state-icon">&#128065;</div>
+    <h3>No blindspots detected yet</h3>
+    <p>Log some entries and the AI will surface knowledge gaps.</p>
+</div>
+{% else %}
+
+<div class="stat-grid cols-2">
+    <div class="stat-card"><div class="number">{{ total }}</div><div class="label">Total Blindspots</div></div>
+    <div class="stat-card"><div class="number">{{ categories|length }}</div><div class="label">Categories</div></div>
+</div>
+
+<hr class="divider">
+
+{% for cat, items in categories.items() %}
+<div class="category-section">
+    <span class="tag tag-rose">{{ cat }}</span>
+
+    {% for bs in items %}
+    <div class="blindspot-card">
+        <div class="blindspot-header">
+            <div>
+                <div class="blindspot-text">{{ bs.suggestion }}</div>
+                <div class="blindspot-meta">From: {{ bs.topic_title }}</div>
+            </div>
+            <div class="entry-date">{{ bs.created_at[:10] if bs.created_at else '' }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
