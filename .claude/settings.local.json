@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python:*)",
       "Bash(pip install:*)",
-      "Bash(FLASK_DEBUG=0 python:*)"
+      "Bash(FLASK_DEBUG=0 python:*)",
+      "Bash(curl:*)"
     ]
   }
 }

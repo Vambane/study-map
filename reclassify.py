@@ -60,6 +60,7 @@ def reclassify_entry(entry_id: int) -> bool:
                 target_id=int(c["entry_id"]),
                 relationship=c["relationship"],
                 strength=float(c.get("strength", 0.5)),
+                explanation=c.get("explanation"),
             )
             print(f"  Added connection to #{c['entry_id']}: {c['relationship']}")
         except Exception as e:
@@ -72,10 +73,18 @@ def reclassify_entry(entry_id: int) -> bool:
                 entry_id=entry_id,
                 suggestion=bs["suggestion"],
                 category=bs.get("category"),
+                why_important=bs.get("why_important"),
+                how_it_helps=bs.get("how_it_helps"),
             )
             print(f"  Added blindspot: {bs['suggestion'][:50]}...")
         except Exception as e:
             print(f"  Blindspot skipped: {e}")
+
+    # Save enhanced summary
+    enhanced = result.get("enhanced_summary")
+    if enhanced:
+        db.update_enhanced_summary(entry_id, enhanced)
+        print(f"  Updated enhanced summary ({len(enhanced)} chars)")
 
     return True
 

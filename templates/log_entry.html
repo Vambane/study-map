@@ -84,15 +84,27 @@
         </div>
         {% endif %}
 
+        {% if result.get('enhanced_summary') %}
+        <div class="card" style="margin-top:20px;margin-bottom:20px;">
+            <div class="card-label">AI-Enhanced Notes <span class="enhanced-badge">Enhanced</span></div>
+            <div class="detail-summary">{{ result.enhanced_summary }}</div>
+        </div>
+        {% endif %}
+
         {% if result.connections %}
         <h3>Connections Found</h3>
         {% for c in result.connections %}
-        <div class="connection-card">
-            <div>
-                <span class="entry-id">ENTRY #{{ c.target_entry_id }}</span>
-                <span class="rel">{{ c.relationship }}</span>
+        <div class="connection-card {% if c.explanation %}has-explanation{% endif %}">
+            <div class="connection-header">
+                <div>
+                    <span class="entry-id">ENTRY #{{ c.target_entry_id }}</span>
+                    <span class="rel">{{ c.relationship }}</span>
+                </div>
+                <span class="tag tag-teal">Strength: {{ c.strength }}</span>
             </div>
-            <span class="tag tag-teal">Strength: {{ c.strength }}</span>
+            {% if c.explanation %}
+            <div class="connection-explanation">{{ c.explanation }}</div>
+            {% endif %}
         </div>
         {% endfor %}
         {% endif %}
@@ -105,6 +117,18 @@
                 <div class="blindspot-text">{{ bs.suggestion }}</div>
                 <span class="tag tag-rose">{{ bs.category or 'Suggestion' }}</span>
             </div>
+            {% if bs.why_important %}
+            <div class="blindspot-motivation">
+                <div class="blindspot-section-label">Why it matters</div>
+                <p class="blindspot-detail">{{ bs.why_important }}</p>
+            </div>
+            {% endif %}
+            {% if bs.how_it_helps %}
+            <div class="blindspot-motivation">
+                <div class="blindspot-section-label">How it helps you</div>
+                <p class="blindspot-detail">{{ bs.how_it_helps }}</p>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
         {% endif %}

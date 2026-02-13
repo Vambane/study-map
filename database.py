@@ -72,6 +72,20 @@ def init_db():
         );
     """)
     conn.commit()
+
+    # Migrations for new columns (idempotent – ignores if already exists)
+    migrations = [
+        "ALTER TABLE connections ADD COLUMN explanation TEXT",
+        "ALTER TABLE blindspots ADD COLUMN why_important TEXT",
+        "ALTER TABLE blindspots ADD COLUMN how_it_helps TEXT",
+        "ALTER TABLE entries ADD COLUMN enhanced_summary TEXT",
+    ]
+    for sql in migrations:
+        try:
+            conn.execute(sql)
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+    conn.commit()
     conn.close()
 
 
@@ -143,7 +157,7 @@ def get_all_entries() -> list[dict]:
     conn = get_connection()
     rows = conn.execute("""
         SELECT e.id, e.topic_id, t.title AS topic_title, e.summary,
-               e.ai_classification, e.created_at,
+               e.enhanced_summary, e.ai_classification, e.created_at,
                GROUP_CONCAT(s.name, ', ') AS skills
         FROM entries e
         JOIN topics t ON t.id = e.topic_id
@@ -166,7 +180,7 @@ def get_entry_by_id(entry_id: int) -> dict | None:
     conn = get_connection()
     row = conn.execute("""
         SELECT e.id, e.topic_id, t.title AS topic_title, e.summary,
-               e.ai_classification, e.created_at,
+               e.enhanced_summary, e.ai_classification, e.created_at,
                GROUP_CONCAT(s.name, ', ') AS skills
         FROM entries e
         JOIN topics t ON t.id = e.topic_id
@@ -187,12 +201,12 @@ def get_entry_by_id(entry_id: int) -> dict | None:
 # ── Connection helpers ───────────────────────────────────────
 
 def add_connection(source_id: int, target_id: int, relationship: str,
-                   strength: float = 0.5):
+                   strength: float = 0.5, explanation: str | None = None):
     conn = get_connection()
     conn.execute(
-        """INSERT INTO connections (source_entry_id, target_entry_id, relationship, strength)
-           VALUES (?, ?, ?, ?)""",
-        (source_id, target_id, relationship, strength),
+        """INSERT INTO connections (source_entry_id, target_entry_id, relationship, strength, explanation)
+           VALUES (?, ?, ?, ?, ?)""",
+        (source_id, target_id, relationship, strength, explanation),
     )
     conn.commit()
     conn.close()
@@ -215,11 +229,22 @@ def get_all_connections() -> list[dict]:
 
 # ── Blindspot helpers ────────────────────────────────────────
 
-def add_blindspot(entry_id: int, suggestion: str, category: str | None = None):
+def add_blindspot(entry_id: int, suggestion: str, category: str | None = None,
+                  why_important: str | None = None, how_it_helps: str | None = None):
     conn = get_connection()
     conn.execute(
-        "INSERT INTO blindspots (entry_id, suggestion, category) VALUES (?, ?, ?)",
-        (entry_id, suggestion, category),
+        "INSERT INTO blindspots (entry_id, suggestion, category, why_important, how_it_helps) VALUES (?, ?, ?, ?, ?)",
+        (entry_id, suggestion, category, why_important, how_it_helps),
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_enhanced_summary(entry_id: int, enhanced_summary: str):
+    conn = get_connection()
+    conn.execute(
+        "UPDATE entries SET enhanced_summary = ? WHERE id = ?",
+        (enhanced_summary, entry_id),
     )
     conn.commit()
     conn.close()

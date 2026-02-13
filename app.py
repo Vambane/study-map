@@ -80,6 +80,7 @@ def log_entry():
                             target_id=int(conn["entry_id"]),
                             relationship=conn["relationship"],
                             strength=float(conn.get("strength", 0.5)),
+                            explanation=conn.get("explanation"),
                         )
                     except Exception:
                         pass
@@ -89,7 +90,13 @@ def log_entry():
                         entry_id=entry_id,
                         suggestion=bs["suggestion"],
                         category=bs.get("category"),
+                        why_important=bs.get("why_important"),
+                        how_it_helps=bs.get("how_it_helps"),
                     )
+
+                enhanced = ai_result.get("enhanced_summary")
+                if enhanced:
+                    db.update_enhanced_summary(entry_id, enhanced)
 
             success_id = entry_id
 
@@ -101,6 +108,7 @@ def log_entry():
                     "classification": ai_result.get("classification"),
                     "connections": [c for c in all_conns if c["source_entry_id"] == entry_id],
                     "blindspots": [b for b in all_bs if b["entry_id"] == entry_id],
+                    "enhanced_summary": ai_result.get("enhanced_summary"),
                 }
 
     # Handle GET with success redirect
@@ -217,6 +225,25 @@ def api_entry(entry_id):
     return jsonify(dict(entry))
 
 
+@app.route("/api/entry/<int:entry_id>/enhance", methods=["POST"])
+def api_enhance_entry(entry_id):
+    entry = db.get_entry_by_id(entry_id)
+    if not entry:
+        return jsonify({"error": "Not found"}), 404
+
+    topic = entry["topic_title"]
+    skills = [s.strip() for s in (entry.get("skills") or "").split(", ") if s.strip()]
+    summary = entry["summary"]
+
+    try:
+        enhanced = ai_service.enhance_notes(topic, skills, summary)
+    except Exception as exc:
+        return jsonify({"error": f"Enhancement failed: {exc}"}), 500
+
+    db.update_enhanced_summary(entry_id, enhanced)
+    return jsonify({"enhanced_summary": enhanced})
+
+
 @app.route("/api/graph-data")
 def api_graph_data():
     entries = db.get_all_entries()
@@ -264,6 +291,7 @@ def api_graph_data():
             "from": f"entry_{c['source_entry_id']}",
             "to": f"entry_{c['target_entry_id']}",
             "label": c["relationship"],
+            "title": c.get("explanation") or c["relationship"],
             "color": {"color": "#f43f5e"},
             "width": max(1.5, c["strength"] * 5),
             "arrows": "to",

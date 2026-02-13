@@ -66,13 +66,58 @@
 
 {% block scripts %}
 <script>
+var showingEnhanced = false;
+
+function toggleSummary() {
+    showingEnhanced = !showingEnhanced;
+    document.getElementById('originalSummary').style.display = showingEnhanced ? 'none' : 'block';
+    document.getElementById('enhancedSummary').style.display = showingEnhanced ? 'block' : 'none';
+    document.getElementById('summaryToggle').textContent = showingEnhanced ? 'Show Original Notes' : 'Show Enhanced Notes';
+}
+
+function reEnhance(entryId) {
+    var btn = document.getElementById('enhanceBtn');
+    btn.textContent = 'Enhancing...';
+    btn.disabled = true;
+    fetch('/api/entry/' + entryId + '/enhance', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.enhanced_summary) {
+                loadDetail(entryId);
+            } else {
+                btn.textContent = 'Enhancement failed';
+            }
+        })
+        .catch(function() {
+            btn.textContent = 'Enhancement failed';
+            btn.disabled = false;
+        });
+}
+
 function loadDetail(id) {
+    showingEnhanced = false;
     fetch('/api/entry/' + id)
-        .then(r => r.json())
-        .then(data => {
-            let html = '<div class="card" style="margin-top:12px;">';
-            html += '<div class="card-label">Full Summary</div>';
-            html += '<div class="detail-summary">' + data.summary + '</div>';
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var html = '<div class="card" style="margin-top:12px;">';
+
+            html += '<div class="card-label">Summary</div>';
+            if (data.enhanced_summary) {
+                html += '<div style="margin-bottom:10px;">';
+                html += '<button class="btn btn-sm" onclick="toggleSummary()" id="summaryToggle">Show Enhanced Notes</button>';
+                html += '</div>';
+                html += '<div id="originalSummary" class="detail-summary">' + data.summary + '</div>';
+                html += '<div id="enhancedSummary" class="detail-summary" style="display:none;">';
+                html += '<span class="enhanced-badge">AI Enhanced</span>';
+                html += '<div style="margin-top:8px;">' + data.enhanced_summary + '</div>';
+                html += '</div>';
+            } else {
+                html += '<div class="detail-summary">' + data.summary + '</div>';
+                html += '<div style="margin-top:10px;">';
+                html += '<button class="btn btn-sm" onclick="reEnhance(' + data.id + ')" id="enhanceBtn">Enhance with AI</button>';
+                html += '</div>';
+            }
+
             if (data.ai_classification) {
                 html += '<div class="card-label" style="margin-top:20px;">AI Classification</div>';
                 html += '<pre class="json-block">' + JSON.stringify(data.ai_classification, null, 2) + '</pre>';
@@ -83,7 +128,7 @@ function loadDetail(id) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const sel = document.getElementById('detailSelect');
+    var sel = document.getElementById('detailSelect');
     if (sel && sel.value) loadDetail(sel.value);
 });
 </script>

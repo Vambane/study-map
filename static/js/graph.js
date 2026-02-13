@@ -49,4 +49,28 @@ function renderGraph(container, data) {
     network.on('stabilizationIterationsDone', function () {
         network.setOptions({ physics: { enabled: false } });
     });
+
+    // Edge click: show explanation popup
+    network.on('click', function (params) {
+        var existing = document.getElementById('edgePopup');
+        if (existing) existing.remove();
+
+        if (params.edges.length === 1 && params.nodes.length === 0) {
+            var edgeId = params.edges[0];
+            var edge = edges.get(edgeId);
+            if (edge && edge.title) {
+                var popup = document.createElement('div');
+                popup.id = 'edgePopup';
+                popup.className = 'edge-popup';
+                popup.style.left = params.event.center.x + 'px';
+                popup.style.top = params.event.center.y + 'px';
+                popup.innerHTML = '<div class="card-label">Connection</div>'
+                    + '<div class="edge-popup-relationship">' + (edge.label || '') + '</div>'
+                    + '<div class="edge-popup-explanation">' + edge.title + '</div>'
+                    + '<div class="edge-popup-close"><button class="btn btn-sm" onclick="document.getElementById(\'edgePopup\').remove()" style="background:var(--bg-primary);color:var(--text-secondary);box-shadow:none;">Close</button></div>';
+                container.style.position = 'relative';
+                container.appendChild(popup);
+            }
+        }
+    });
 }

@@ -35,6 +35,18 @@
             </div>
             <div class="entry-date">{{ bs.created_at[:10] if bs.created_at else '' }}</div>
         </div>
+        {% if bs.why_important %}
+        <div class="blindspot-motivation">
+            <div class="blindspot-section-label">Why it matters</div>
+            <p class="blindspot-detail">{{ bs.why_important }}</p>
+        </div>
+        {% endif %}
+        {% if bs.how_it_helps %}
+        <div class="blindspot-motivation">
+            <div class="blindspot-section-label">How it helps you</div>
+            <p class="blindspot-detail">{{ bs.how_it_helps }}</p>
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
 </div>

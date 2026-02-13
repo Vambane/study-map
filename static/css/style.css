@@ -735,6 +735,98 @@ a:hover { text-decoration: underline; }
     .stat-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ── Connection explanation ─────────────────────────────── */
+.connection-card.has-explanation {
+    display: block;
+}
+
+.connection-card.has-explanation .connection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.connection-explanation {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    border-top: 1px solid rgba(91,184,169,0.10);
+    padding-top: 10px;
+}
+
+/* ── Blindspot motivation ──────────────────────────────── */
+.blindspot-motivation {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(244,63,94,0.08);
+}
+
+.blindspot-section-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+
+.blindspot-detail {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-top: 2px;
+}
+
+/* ── Enhanced summary ──────────────────────────────────── */
+.enhanced-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(139,92,246,0.10);
+    color: #7c3aed;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 8px;
+}
+
+/* ── Edge popup (graph) ────────────────────────────────── */
+.edge-popup {
+    position: absolute;
+    z-index: 50;
+    max-width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    box-shadow: var(--shadow-lg);
+}
+
+.edge-popup .card-label {
+    margin-bottom: 6px;
+}
+
+.edge-popup-relationship {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.edge-popup-explanation {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.edge-popup-close {
+    margin-top: 12px;
+    text-align: right;
+}
+
 @media (max-width: 768px) {
     .sidebar {
         position: relative;

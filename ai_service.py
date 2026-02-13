@@ -77,22 +77,27 @@ Respond with ONLY valid JSON (no markdown fences, no explanation) matching this 
   "connections": [
     {{
       "entry_id": 0,
-      "relationship": "<short description>",
-      "strength": 0.5
+      "relationship": "<short label, < 15 words>",
+      "strength": 0.5,
+      "explanation": "<A detailed paragraph (3-5 sentences) explaining HOW and WHY these two topics intersect. Describe the conceptual bridge between them, what shared principles or dependencies exist, and how understanding one deepens understanding of the other.>"
     }}
   ],
   "blindspots": [
     {{
       "suggestion": "<a topic or concept the user should explore next>",
-      "category": "<why – e.g. prerequisite, adjacent, deeper-dive>"
+      "category": "<e.g. prerequisite, adjacent, deeper-dive>",
+      "why_important": "<2-3 sentences explaining WHY the user should focus on this topic. What gap does it fill? What risks come from not knowing it?>",
+      "how_it_helps": "<2-3 sentences explaining HOW learning this will make the user better. What concrete skills or understanding will they gain?>"
     }}
-  ]
+  ],
+  "enhanced_summary": "<An enriched version of the user's summary. Keep their original meaning and voice but add: (1) technical precision and correct terminology, (2) important details or nuances they may have missed, (3) connections to broader concepts, (4) what they should pay special attention to going forward. This should be 2-3 paragraphs, substantively richer than the original.>"
 }}
 
 Rules:
 - connections array should only reference IDs from the previous entries listed above. If there are no previous entries return an empty array [].
 - Provide 2-5 blindspot suggestions.
-- Keep relationship descriptions concise (< 15 words).
+- Keep relationship descriptions concise (< 15 words). The explanation field is where you provide the detailed analysis.
+- The enhanced_summary should be meaningfully richer than the original summary, adding technical depth and learning-critical context.
 - Output ONLY the JSON object, nothing else.
 """
 
@@ -112,3 +117,23 @@ Rules:
         raw = raw[start:end]
 
     return json.loads(raw)
+
+
+def enhance_notes(topic: str, skills: list[str], summary: str) -> str:
+    """Return an enhanced version of the user's study notes."""
+    prompt = f"""You are a learning-analytics assistant. The user wrote the following study notes and wants them enhanced with more technical depth and detail.
+
+**Topic:** {topic}
+**Skills:** {', '.join(skills)}
+**Original Notes:**
+{summary}
+
+Write an enriched version of these notes that:
+1. Keeps the user's original meaning and voice
+2. Adds technical precision and correct terminology
+3. Fills in important details or nuances they may have missed
+4. Connects ideas to broader concepts in the field
+5. Highlights what they should pay special attention to going forward
+
+Return ONLY the enhanced text (2-3 paragraphs). No JSON, no markdown fences, no preamble."""
+    return _chat(prompt).strip()
